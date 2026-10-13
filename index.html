@@ -575,7 +575,8 @@ document.addEventListener("dragstart", e => { if (e.target.tagName === "IMG") e.
 // 오늘·전체 방문자 수 (GoatCounter에서 가져옴. 숫자는 최대 몇 시간 늦게 바뀔 수 있음)
 (function () {
   const base = "https://leeeunju.goatcounter.com/counter/TOTAL.json";
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());   // 2026-10-14 형식
+  // GoatCounter는 날짜를 세계 표준시(UTC)로 나눔 → '오늘'은 한국 시간 오전 9시에 새로 시작
+  const today = new Date().toISOString().slice(0, 10);   // 2026-10-14 형식
   const get = url => fetch(url).then(r => (r.ok ? r.json() : Promise.reject(r.status)));
   Promise.all([get(base + "?start=" + today), get(base)]).then(([t, a]) => {
     document.getElementById("vToday").textContent = t.count;
