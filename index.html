@@ -344,6 +344,12 @@ function layout(force) {
     }
     cols[k].appendChild(b);
   });
+  // 컴퓨터(3줄)에서는 마지막 두 작품(16번·17번)의 자리를 서로 바꿈 (번호는 그대로)
+  if (n === 3) {
+    const a = items[items.length - 2], z = items[items.length - 1];
+    const ca = a.parentNode, cz = z.parentNode;
+    if (ca !== cz) { cz.appendChild(a); ca.appendChild(z); }
+  }
 }
 layout();
 addEventListener("resize", () => layout());
