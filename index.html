@@ -155,7 +155,7 @@
   .lb.open { display: flex; }
   .lb figure { margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 0; flex: 1; width: 100%; }
   .lb img { max-width: 100%; max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); object-fit: contain; flex: none; user-select: none; transition: opacity .2s; }
-  .lb .zw { overflow: hidden; line-height: 0; flex: none; }
+  .lb .zw { overflow: hidden; line-height: 0; flex: none; touch-action: none; }
   .lb .zw img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; transform-origin: 0 0; will-change: transform; }
   .lb .zw.zoomed img { cursor: grab; }
   .lb .zw.dragging img { cursor: grabbing; }
@@ -424,7 +424,7 @@ document.addEventListener("keydown", e => {
 });
 // 휴대폰에서 옆으로 밀어서 넘기기
 let sx = null;
-// 크게 보기에서 그림 위로 마우스 휠(스크롤)을 굴리면 그 부분을 확대/축소 (원래 크기보다 작아지지 않음)
+// 크게 보기에서 그림 위로 마우스 휠(스크롤)을 굴리거나 휴대폰에서 두 손가락으로 벌리면 확대/축소 (원래 크기보다 작아지지 않음)
 // 확대한 상태에서는 그림을 끌어서 옮겨 볼 수 있음
 const zw = document.getElementById("zw");
 // 그림 틀 크기를 화면에 맞게 계산 (그림 비율 유지)
@@ -446,35 +446,73 @@ function applyZoom() {
   zw.classList.toggle("zoomed", zs > 1);
 }
 function resetZoom() { zs = 1; zx = 0; zy = 0; drag = null; zw.classList.remove("dragging"); applyZoom(); }
+// (px, py) = 틀 안의 위치. 그 지점을 중심으로 배율 ns로 확대/축소
+function zoomAt(px, py, ns) {
+  ns = Math.min(Z_MAX, Math.max(1, ns));
+  const lx = (px - zx) / zs, ly = (py - zy) / zs;                  // 그림 원래 크기 기준 위치
+  zx = px - lx * ns; zy = py - ly * ns; zs = ns;
+  if (zs < 1.01) { zs = 1; zx = 0; zy = 0; }
+  applyZoom();
+}
 zw.addEventListener("wheel", e => {
   e.preventDefault();
   const r = zw.getBoundingClientRect();
-  const px = e.clientX - r.left, py = e.clientY - r.top;          // 틀 안에서 마우스 위치
-  const lx = (px - zx) / zs, ly = (py - zy) / zs;                  // 그림 원래 크기 기준 위치
-  const ns = Math.min(Z_MAX, Math.max(1, zs * Math.exp(-e.deltaY * 0.0015)));
-  zx = px - lx * ns; zy = py - ly * ns; zs = ns;                   // 마우스가 가리키는 곳을 중심으로
-  if (zs < 1.01) { zs = 1; zx = 0; zy = 0; }
-  applyZoom();
+  zoomAt(e.clientX - r.left, e.clientY - r.top, zs * Math.exp(-e.deltaY * 0.0015));
 }, { passive: false });
+
+// 마우스로 끌기 · 휴대폰에서 한 손가락으로 끌기 · 두 손가락으로 벌려 확대
+const pts = new Map();
+let pinch = null, zoomedInGesture = false, lastTap = 0;
+function startDrag(x, y) { drag = { x: x - zx, y: y - zy }; zw.classList.add("dragging"); }
+function midDist() {
+  const [a, b] = [...pts.values()], r = zw.getBoundingClientRect();
+  return { x: (a.x + b.x) / 2 - r.left, y: (a.y + b.y) / 2 - r.top, d: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
+}
 zw.addEventListener("pointerdown", e => {
-  if (zs === 1 || e.button !== 0) return;
-  drag = { x: e.clientX - zx, y: e.clientY - zy };
-  zw.setPointerCapture(e.pointerId);
-  zw.classList.add("dragging");
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { zw.setPointerCapture(e.pointerId); } catch (err) {}
+  if (pts.size === 2) {                 // 두 손가락 → 확대 시작
+    drag = null; zw.classList.remove("dragging");
+    pinch = { d: midDist().d, s: zs };
+    zoomedInGesture = true;
+  } else if (pts.size === 1 && zs > 1) {
+    startDrag(e.clientX, e.clientY);
+  }
 });
 zw.addEventListener("pointermove", e => {
-  if (!drag) return;
-  zx = e.clientX - drag.x; zy = e.clientY - drag.y;
-  applyZoom();
+  if (!pts.has(e.pointerId)) return;
+  pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && pts.size === 2) {
+    const m = midDist();
+    zoomAt(m.x, m.y, pinch.s * m.d / pinch.d);
+  } else if (drag) {
+    zx = e.clientX - drag.x; zy = e.clientY - drag.y;
+    applyZoom();
+  }
 });
-["pointerup", "pointercancel"].forEach(t => zw.addEventListener(t, () => { drag = null; zw.classList.remove("dragging"); }));
+function endPointer(e) {
+  pts.delete(e.pointerId);
+  if (pts.size < 2) pinch = null;
+  drag = null; zw.classList.remove("dragging");
+  if (pts.size === 1 && zs > 1) { const p = [...pts.values()][0]; startDrag(p.x, p.y); }   // 남은 손가락으로 계속 끌기
+  // 휴대폰에서 두 번 톡톡 → 원래 크기
+  if (e.type === "pointerup" && e.pointerType === "touch" && pts.size === 0 && !zoomedInGesture) {
+    const now = Date.now();
+    if (now - lastTap < 300 && zs > 1) resetZoom();
+    lastTap = now;
+  }
+  if (pts.size === 0) setTimeout(() => { zoomedInGesture = false; }, 0);
+}
+zw.addEventListener("pointerup", endPointer);
+zw.addEventListener("pointercancel", endPointer);
 zw.addEventListener("dblclick", resetZoom);   // 두 번 클릭하면 원래 크기로
 
-lb.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener("touchstart", e => { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
 lb.addEventListener("touchend", e => {
-  if (sx === null) return;
+  if (sx === null || e.touches.length > 0) { sx = null; return; }
   const dx = e.changedTouches[0].clientX - sx;
-  if (Math.abs(dx) > 50 && zs === 1) show(cur + (dx < 0 ? 1 : -1));
+  if (Math.abs(dx) > 50 && zs === 1 && !zoomedInGesture) show(cur + (dx < 0 ? 1 : -1));
   sx = null;
 });
 
