@@ -304,7 +304,7 @@ const items = WORKS.map((w, i) => {
   b.innerHTML = `<div class="frame"><img src="images/${w.file}-s.jpg" width="${w.w}" height="${w.h}" alt="이은주, 〈${w.title}〉" loading="lazy"></div>
     <div class="cap"><span class="no">${pad(i + 1)}</span><span class="t">${w.title}</span></div>
     ${meta(w) ? `<span class="meta">${meta(w)}</span>` : ""}`;
-  b.addEventListener("click", () => openLb(i));
+  b.addEventListener("click", () => openLb(order.indexOf(i)));
   return b;
 });
 let nCols = 0;
@@ -320,9 +320,19 @@ function layout() {
     cols[k].appendChild(items[i]);
     hs[k] += w.h / w.w + 0.15;   // 0.15 = 제목·여백 높이 대략
   });
+  renumber();
+}
+// 번호는 화면에 보이는 순서(위→아래, 왼쪽→오른쪽)대로 매기기. 크게 보기에서 넘기는 순서도 이 번호를 따라감
+let order = WORKS.map((_, i) => i);
+function renumber() {
+  const pos = items.map((b, i) => { const r = b.getBoundingClientRect(); return { i, top: Math.round(r.top + scrollY), left: r.left }; });
+  pos.sort((a, b) => (Math.abs(a.top - b.top) > 8 ? a.top - b.top : a.left - b.left));
+  order = pos.map(p => p.i);
+  order.forEach((wi, n) => { items[wi].querySelector(".no").textContent = pad(n + 1); });
 }
 layout();
-addEventListener("resize", layout);
+addEventListener("resize", () => { const n = nCols; layout(); if (n === nCols) renumber(); });
+if (document.fonts) document.fonts.ready.then(renumber);
 
 // 크게 보기
 const lb = document.getElementById("lb"), lbImg = document.getElementById("lbImg"), lbCap = document.getElementById("lbCap");
@@ -342,7 +352,7 @@ function load(w) {
 let token = 0;
 function show(i) {
   cur = (i + WORKS.length) % WORKS.length;
-  const w = WORKS[cur], my = ++token, c = load(w);
+  const w = WORKS[order[cur]], my = ++token, c = load(w);
   lbImg.alt = `이은주, 〈${w.title}〉`;
   lbCap.innerHTML = `${w.title}${meta(w) ? `<span class="meta">${meta(w)}</span>` : ""}${w.desc ? `<span class="desc">${w.desc}</span>` : ""}<small>${pad(cur + 1)} / ${pad(WORKS.length)}</small>`;
   if (c.ready) {                       // 이미 불러온 그림: 바로 바꾸기
@@ -360,7 +370,7 @@ function show(i) {
     });
   }
   // 앞뒤 그림 미리 불러오기
-  [1, -1, 2].forEach(d => load(WORKS[(cur + d + WORKS.length) % WORKS.length]));
+  [1, -1, 2].forEach(d => load(WORKS[order[(cur + d + WORKS.length) % WORKS.length]]));
 }
 function openLb(i) {
   lastFocus = document.activeElement;
