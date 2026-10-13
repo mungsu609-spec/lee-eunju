@@ -82,7 +82,13 @@
   .work .t { font-size: 16px; }
 
   /* 작가 소개 */
-  .about { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 56px; align-items: start; }
+  .about {
+    display: grid; grid-template-columns: 235px minmax(0, 1fr); grid-template-rows: auto 1fr;
+    grid-template-areas: "photo name" "photo info"; column-gap: 56px; align-items: start;
+  }
+  .about .portrait { grid-area: photo; }
+  .about .name { grid-area: name; }
+  .about .info { grid-area: info; }
   .about .portrait { background: var(--paper); padding: 9px; box-shadow: 0 8px 24px rgba(60,45,30,.08); }
   .about .portrait img { display: block; width: 100%; height: auto; }
   .about h3 { font-size: 30px; font-weight: 400; letter-spacing: .2em; margin: 0 0 4px; }
@@ -138,8 +144,10 @@
     .work .frame { padding: 7px; }
     .work .t { font-size: 14px; }
     .work .meta { font-size: 11.5px; }
-    .about { grid-template-columns: 1fr; gap: 32px; }
-    .about .portrait { width: 180px; }
+    .about { grid-template-columns: 130px minmax(0, 1fr); grid-template-rows: auto auto; grid-template-areas: "photo name" "info info"; column-gap: 20px; row-gap: 28px; align-items: center; }
+    .about .portrait { padding: 6px; }
+    .about h3 { font-size: 26px; }
+    .about .en { font-size: 16px; margin: 0; }
     .lb { padding: 56px 8px 16px; }
     .lb .prev, .lb .next { top: auto; bottom: 8px; transform: none; }
     .lb img { max-height: calc(100dvh - 300px); }
@@ -177,9 +185,11 @@
       <div class="sec-head"><h2>작가 소개</h2><span>About</span></div>
       <div class="about">
         <div class="portrait"><img src="images/artist.jpg" width="483" height="610" alt="작가 이은주" loading="lazy"></div>
-        <div>
+        <div class="name">
           <h3>이은주</h3>
           <p class="en">Lee Eun Ju — Painter</p>
+        </div>
+        <div class="info">
           <ul class="cv">
             <li>개인전 2회</li>
             <li>바투아트 팜 갤러리 기획전</li>
