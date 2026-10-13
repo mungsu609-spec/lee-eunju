@@ -155,7 +155,15 @@
   .lb.open { display: flex; }
   .lb figure { margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 0; flex: 1; width: 100%; }
   .lb img { max-width: 100%; max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); object-fit: contain; flex: none; user-select: none; transition: opacity .2s; }
-  .lb .zw { overflow: hidden; line-height: 0; flex: none; touch-action: none; }
+  .lb .zw { position: relative; overflow: hidden; line-height: 0; flex: none; touch-action: none; }
+  .lb button.zreset {
+    position: absolute; right: 10px; bottom: 10px; top: auto; left: auto; width: auto; height: 34px; padding: 0 13px;
+    display: flex; align-items: center; gap: 6px; border-radius: 17px; opacity: 0; pointer-events: none;
+    background: rgba(24, 21, 18, .72); color: #f1ece4; font: inherit; font-size: 13px; line-height: 1; letter-spacing: .02em;
+    backdrop-filter: blur(6px); transform: none; transition: opacity .2s;
+  }
+  .lb .zw.zoomed button.zreset { opacity: 1; pointer-events: auto; }
+  .lb button.zreset:hover { background: rgba(24, 21, 18, .9); }
   .lb .zw img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; transform-origin: 0 0; will-change: transform; }
   .lb .zw.zoomed img { cursor: grab; }
   .lb .zw.dragging img { cursor: grabbing; }
@@ -266,7 +274,7 @@
   <button class="close" aria-label="닫기"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
   <button class="prev" aria-label="이전 작품"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 4l-8 8 8 8"/></svg></button>
   <button class="next" aria-label="다음 작품"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 4l8 8-8 8"/></svg></button>
-  <figure><div class="zw" id="zw"><img id="lbImg" alt="" draggable="false"></div><figcaption id="lbCap"></figcaption></figure>
+  <figure><div class="zw" id="zw"><img id="lbImg" alt="" draggable="false"><button class="zreset" id="zreset" aria-label="원래 크기로"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>원래 크기</button></div><figcaption id="lbCap"></figcaption></figure>
 </div>
 
 <script>
@@ -468,6 +476,10 @@ function midDist() {
   const [a, b] = [...pts.values()], r = zw.getBoundingClientRect();
   return { x: (a.x + b.x) / 2 - r.left, y: (a.y + b.y) / 2 - r.top, d: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
 }
+// 확대했을 때 그림 오른쪽 아래에 '원래 크기' 버튼
+const zreset = document.getElementById("zreset");
+zreset.addEventListener("pointerdown", e => e.stopPropagation());
+zreset.addEventListener("click", e => { e.stopPropagation(); resetZoom(); });
 zw.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
