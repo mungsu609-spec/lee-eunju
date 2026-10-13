@@ -130,6 +130,22 @@
   .music.on .label { color: var(--ink); }
   footer .credit { display: block; margin-top: 6px; font-size: 12px; opacity: .85; }
 
+  /* 작품 위 'View' 동그라미 (마우스 쓰는 컴퓨터에서만) */
+  .viewcur {
+    position: fixed; left: 0; top: 0; z-index: 45; pointer-events: none;
+    width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--ink) 82%, transparent); color: var(--bg);
+    font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 19px; letter-spacing: .06em;
+    translate: var(--x, -200px) var(--y, -200px);
+    opacity: 0; transform: scale(.4);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .viewcur.show { opacity: 1; transform: scale(1); }
+  @media (hover: hover) and (pointer: fine) {
+    .work { cursor: none; }
+  }
+
   /* 크게 보기 */
   .lb {
     position: fixed; inset: 0; z-index: 50; background: var(--overlay);
@@ -237,6 +253,8 @@
 <footer>© <span id="yr"></span> 이은주 Lee Eun Ju. All rights reserved.
   <span class="credit">배경 음악: 쇼팽 녹턴 20번 (Frank Lévy) · 슈만 트로이메라이 · 드뷔시 달빛 (Laurens Goedhart) · 사티 짐노페디 1번 (Robin Alciatore) — 퍼블릭 도메인 녹음, Musopen · Wikimedia Commons</span>
 </footer>
+
+<div class="viewcur" id="viewcur" aria-hidden="true">View</div>
 
 <button class="music" id="music" aria-label="배경 음악 켜기"><span class="bars"><i></i><i></i><i></i></span><span class="label">음악 켜기</span></button>
 
@@ -404,6 +422,25 @@ lb.addEventListener("touchend", e => {
 // 스크롤하면 메뉴 아래 선 보이기
 const nav = document.querySelector("header.nav");
 addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 10), { passive: true });
+
+// 작품 위에 마우스를 올리면 'View' 동그라미가 마우스를 따라다님 (휴대폰에서는 안 나옴)
+if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+  const vc = document.getElementById("viewcur");
+  let mx = -200, my = -200;
+  const check = () => {
+    const el = document.elementFromPoint(mx, my);
+    vc.classList.toggle("show", !!(el && el.closest(".work")) && !lb.classList.contains("open"));
+  };
+  addEventListener("mousemove", e => {
+    mx = e.clientX; my = e.clientY;
+    vc.style.setProperty("--x", mx + "px");
+    vc.style.setProperty("--y", my + "px");
+    check();
+  }, { passive: true });
+  addEventListener("scroll", check, { passive: true });
+  document.addEventListener("mouseleave", () => vc.classList.remove("show"));
+  grid.addEventListener("click", () => vc.classList.remove("show"));
+}
 
 // 배경 음악: 4곡을 순서대로 반복. 브라우저가 소리 자동 재생을 막아서, 처음 화면을 누르면 시작돼요.
 // 곡 순서·이름을 바꾸려면 이 목록만 고치면 됩니다.
