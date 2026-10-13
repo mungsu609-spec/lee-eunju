@@ -76,14 +76,15 @@
   .work:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .work .cap { display: flex; gap: 10px; align-items: baseline; margin-top: 12px; padding: 0 2px; }
   .work .meta { display: block; margin: 2px 0 0 2px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .lb figcaption .desc { display: block; max-width: 34em; margin: 10px auto 0; color: #d9d2c7; font-size: 15px; line-height: 1.75; letter-spacing: 0; }
   .lb figcaption .meta { display: block; color: #cfc7bc; font-size: 14px; letter-spacing: .02em; margin-top: 2px; }
   .work .no { font-family: "Cormorant Garamond", serif; color: var(--muted); font-size: 15px; }
   .work .t { font-size: 16px; }
 
   /* 작가 소개 */
-  .about { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 64px; align-items: start; }
-  .about .portrait { background: var(--paper); padding: 14px; box-shadow: 0 8px 24px rgba(60,45,30,.08); }
-  .about .portrait img { display: block; width: 100%; }
+  .about { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 56px; align-items: start; }
+  .about .portrait { background: var(--paper); padding: 9px; box-shadow: 0 8px 24px rgba(60,45,30,.08); }
+  .about .portrait img { display: block; width: 100%; height: auto; }
   .about h3 { font-size: 30px; font-weight: 400; letter-spacing: .2em; margin: 0 0 4px; }
   .about .en { font-family: "Cormorant Garamond", serif; font-style: italic; color: var(--muted); font-size: 18px; margin: 0 0 28px; }
   .cv { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
@@ -109,9 +110,10 @@
   }
   .lb.open { display: flex; }
   .lb figure { margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 0; flex: 1; width: 100%; }
-  .lb img { max-width: 100%; max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); object-fit: contain; flex: none; user-select: none; transition: opacity .25s; }
+  .lb img { max-width: 100%; max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); object-fit: contain; flex: none; user-select: none; transition: opacity .25s; }
   .lb img.loading { opacity: .2; }
   .lb figcaption { margin-top: 18px; text-align: center; font-size: 18px; letter-spacing: .08em; }
+  .lb figcaption small { margin-top: 8px; }
   .lb figcaption small { display: block; font-family: "Cormorant Garamond", serif; color: #a9a095; font-size: 15px; letter-spacing: .12em; }
   .lb button {
     position: absolute; background: none; border: 0; color: #f1ece4; cursor: pointer; opacity: .7;
@@ -131,10 +133,12 @@
     .work .frame { padding: 7px; }
     .work .t { font-size: 14px; }
     .work .meta { font-size: 11.5px; }
-    .about { grid-template-columns: 1fr; gap: 36px; }
+    .about { grid-template-columns: 1fr; gap: 32px; }
+    .about .portrait { width: 180px; }
     .lb { padding: 56px 8px 16px; }
     .lb .prev, .lb .next { top: auto; bottom: 8px; transform: none; }
-    .lb img { max-height: calc(100dvh - 190px); }
+    .lb img { max-height: calc(100dvh - 300px); }
+    .lb figcaption .desc { font-size: 13.5px; padding: 0 8px; }
     .lb figcaption { margin-bottom: 56px; }
   }
 </style>
@@ -203,25 +207,43 @@
 // 작품 목록: 순서를 바꾸고 싶으면 이 줄들의 순서만 바꾸면 됩니다.
 // file = images 폴더 안 파일 번호, title = 작품 제목, w/h = 그림 비율
 // year·medium·size(제작 연도·재료·크기)는 아직 임시로 적어 둔 값이에요 → 진짜 정보로 고치기!
+// desc(작품 설명)도 임시 글이에요. 그림을 눌러 크게 볼 때 제목 아래에 보여요.
 // 칸을 비워 두면("") 그 정보는 화면에 안 보여요.
 const WORKS = [
-  { file: "01", title: "기도", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "72.7×90.9cm", w: 1577, h: 2000 },
-  { file: "04", title: "모성", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×60.6cm", w: 1523, h: 2000 },
-  { file: "10", title: "여인", year: "2021", medium: "캔버스에 아크릴", size: "53.0×72.7cm", w: 1515, h: 2000 },
-  { file: "03", title: "마음", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "60.6×45.5cm", w: 2000, h: 1504 },
-  { file: "11", title: "여인과 꽃", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "65.1×80.3cm", w: 1629, h: 2000 },
-  { file: "07", title: "비원(悲願)", year: "2025", medium: "캔버스에 아크릴, 혼합재료", size: "30×60cm", w: 1012, h: 2000 },
-  { file: "02", title: "담벼락 위 소망", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "53.0×60.6cm", w: 1735, h: 2000 },
-  { file: "12", title: "여인과 꽃2", year: "2021", medium: "캔버스에 유채", size: "50.0×72.7cm", w: 1377, h: 2000 },
-  { file: "05", title: "봄", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "116.8×91.0cm", w: 2000, h: 1542 },
-  { file: "13", title: "자유", year: "2025", medium: "캔버스에 유채", size: "72.7×90.9cm", w: 1622, h: 2000 },
-  { file: "08", title: "생명", year: "2020", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×60.6cm", w: 1523, h: 2000 },
-  { file: "15", title: "치유", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "60.6×80.3cm", w: 1526, h: 2000 },
-  { file: "06", title: "비상", year: "2020", medium: "한지에 채색", size: "45.5×106.0cm", w: 841,  h: 2000 },
-  { file: "14", title: "쵸키", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×53.0cm", w: 1697, h: 2000 },
-  { file: "16", title: "해바라기", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "33.4×65.1cm", w: 992,  h: 2000 },
-  { file: "17", title: "가을의 사색", year: "2025", medium: "캔버스에 아크릴, 혼합재료", size: "30×60cm", w: 979,  h: 2000 },
-  { file: "09", title: "아기 천사", year: "2019", medium: "종이에 연필, 색연필", size: "31.8×50.0cm", w: 1265, h: 2000 },
+  { file: "01", title: "기도", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "72.7×90.9cm",
+    desc: "눈을 감은 여인이 두 손에 작은 새를 품고 있다. 동백과 사슴, 푸른 나무 사이에서 조용히 마음을 모으는 순간, 간절함과 평온함이 함께 머문다.", w: 1577, h: 2000 },
+  { file: "04", title: "모성", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×60.6cm",
+    desc: "아이를 품에 안은 어머니를 꽃이 둥글게 감싼다. 입체로 빚어낸 꽃송이 하나하나에 생명을 길러 내는 사랑의 온기를 담았다.", w: 1523, h: 2000 },
+  { file: "10", title: "여인", year: "2021", medium: "캔버스에 아크릴", size: "53.0×72.7cm",
+    desc: "쪽진 머리에 연두 저고리를 입은 여인의 옆모습. 말없이 먼 곳을 바라보는 시선에 단아함과 기다림이 스며 있다.", w: 1515, h: 2000 },
+  { file: "03", title: "마음", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "60.6×45.5cm",
+    desc: "넓은 연잎과 연밥이 화면을 채운다. 흙탕물 속에서도 맑게 피어나는 연처럼, 고요하고 둥근 마음을 그리고 싶었다.", w: 2000, h: 1504 },
+  { file: "11", title: "여인과 꽃", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "65.1×80.3cm",
+    desc: "초록 산을 배경으로 꽃다발을 품은 여인. 투명한 치맛자락과 피어나는 꽃이 어우러져 꿈결 같은 봄의 기운을 전한다.", w: 1629, h: 2000 },
+  { file: "07", title: "비원(悲願)", year: "2025", medium: "캔버스에 아크릴, 혼합재료", size: "30×60cm",
+    desc: "흰 두건을 쓴 여인이 정면을 바라본다. 화면을 가르는 잎사귀 문양과 꽃 사이로, 쉽게 말할 수 없는 간절한 바람이 깃들어 있다.", w: 1012, h: 2000 },
+  { file: "02", title: "담벼락 위 소망", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "53.0×60.6cm",
+    desc: "기와 담장 위로 석류가 붉게 익었다. 알알이 맺힌 열매처럼 소박한 소망들이 넉넉히 영글기를 바라는 마음을 담았다.", w: 1735, h: 2000 },
+  { file: "12", title: "여인과 꽃2", year: "2021", medium: "캔버스에 유채", size: "50.0×72.7cm",
+    desc: "수국 곁에 선 한복 차림의 여인. 손에 든 두루마리와 차분한 눈빛에서 깊어진 생각과 기품이 느껴진다.", w: 1377, h: 2000 },
+  { file: "05", title: "봄", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "116.8×91.0cm",
+    desc: "푸른 하늘 아래 산자락을 따라 꽃잎이 흩날린다. 하나하나 빚어 붙인 꽃잎이 겨울을 지나 다시 찾아온 봄의 설렘을 노래한다.", w: 2000, h: 1542 },
+  { file: "13", title: "자유", year: "2025", medium: "캔버스에 유채", size: "72.7×90.9cm",
+    desc: "바람에 머리칼을 날리며 몸을 젖힌 여인. 얽매임 없이 자신을 펼치는 순간의 해방감을 맑은 색으로 표현했다.", w: 1622, h: 2000 },
+  { file: "08", title: "생명", year: "2020", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×60.6cm",
+    desc: "어두운 수면 위로 연꽃이 피어난다. 둥근 연잎 사이에서 열리는 흰 꽃잎으로 생명이 시작되는 신비로운 순간을 그렸다.", w: 1523, h: 2000 },
+  { file: "15", title: "치유", year: "2024", medium: "캔버스에 아크릴, 혼합재료", size: "60.6×80.3cm",
+    desc: "초록 잎 아래 여인이 어깨에 새를 얹고 눈을 감는다. 꽃과 새, 잎사귀가 건네는 위로 속에서 마음이 천천히 회복된다.", w: 1526, h: 2000 },
+  { file: "06", title: "비상", year: "2020", medium: "한지에 채색", size: "45.5×106.0cm",
+    desc: "빛 속으로 날아오르는 무용수. 한지 위에 번지는 푸른 색감 사이로 중력을 벗어나려는 몸짓과 꿈을 담았다.", w: 841,  h: 2000 },
+  { file: "14", title: "쵸키", year: "2023", medium: "캔버스에 아크릴, 혼합재료", size: "45.5×53.0cm",
+    desc: "꽃무늬 위를 뛰노는 반려견 쵸키. 새와 도마뱀 친구들과 함께하는 즐거운 하루를 밝고 동화 같은 색으로 그렸다.", w: 1697, h: 2000 },
+  { file: "16", title: "해바라기", year: "2022", medium: "캔버스에 아크릴, 혼합재료", size: "33.4×65.1cm",
+    desc: "푸른 화병에 해바라기가 가득 피었다. 입체로 살린 꽃잎에 풍요와 행운, 밝은 기운이 오래 머물기를 바랐다.", w: 992,  h: 2000 },
+  { file: "17", title: "가을의 사색", year: "2025", medium: "캔버스에 아크릴, 혼합재료", size: "30×60cm",
+    desc: "금빛 이삭 앞에서 턱을 괸 여인. 무르익은 계절 속에서 지나온 시간을 조용히 돌아보는 마음을 담았다.", w: 979,  h: 2000 },
+  { file: "09", title: "아기 천사", year: "2019", medium: "종이에 연필, 색연필", size: "31.8×50.0cm",
+    desc: "귀 달린 모자와 망토를 쓴 강아지. 연필로 한 올 한 올 그린 털과 순한 눈망울에 사랑스러움을 담았다.", w: 1265, h: 2000 },
 ];
 
 const grid = document.getElementById("grid");
@@ -270,7 +292,7 @@ function show(i) {
   big.onload = () => { if (WORKS[cur] === w) { lbImg.src = big.src; lbImg.classList.remove("loading"); } };
   big.src = `images/${w.file}.jpg`;                // 큰 그림 불러오면 교체
   lbImg.alt = `이은주, 〈${w.title}〉`;
-  lbCap.innerHTML = `${w.title}${meta(w) ? `<span class="meta">${meta(w)}</span>` : ""}<small>${pad(cur + 1)} / ${pad(WORKS.length)}</small>`;
+  lbCap.innerHTML = `${w.title}${meta(w) ? `<span class="meta">${meta(w)}</span>` : ""}${w.desc ? `<span class="desc">${w.desc}</span>` : ""}<small>${pad(cur + 1)} / ${pad(WORKS.length)}</small>`;
   // 다음 그림 미리 불러오기
   new Image().src = `images/${WORKS[(cur + 1) % WORKS.length].file}.jpg`;
 }
