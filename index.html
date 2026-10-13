@@ -4,10 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이은주 · Lee Eun Ju</title>
-<meta name="description" content="화가 이은주의 작품 포트폴리오">
+<meta name="description" content="화가 이은주의 작품 포트폴리오 — 꽃과 여인, 입체로 빚어낸 그림들">
+<!-- 카톡·문자·SNS로 링크를 보낼 때 뜨는 미리보기 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="이은주 · Lee Eun Ju">
 <meta property="og:title" content="이은주 · Lee Eun Ju">
-<meta property="og:description" content="화가 이은주의 작품 포트폴리오">
-<meta property="og:image" content="https://mungsu609-spec.github.io/lee-eunju/images/01-s.jpg">
+<meta property="og:description" content="화가 이은주의 작품 포트폴리오 — 꽃과 여인, 입체로 빚어낸 그림들">
+<meta property="og:url" content="https://mungsu609-spec.github.io/lee-eunju/">
+<meta property="og:image" content="https://mungsu609-spec.github.io/lee-eunju/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="화가 이은주의 작품 〈기도〉와 〈모성〉">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f7f4ef">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -73,6 +83,8 @@
   }
   .work .frame { background: var(--paper); padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(60,45,30,.08); transition: transform .35s ease, box-shadow .35s ease; }
   .work img { display: block; width: 100%; height: auto; background: var(--line); }
+  /* 그림 저장 어렵게: 끌어서 저장·길게 눌러 저장 막기 */
+  img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .work:hover .frame, .work:focus-visible .frame { transform: translateY(-4px); box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 16px 36px rgba(60,45,30,.14); }
   .work:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .work .cap { display: flex; gap: 10px; align-items: baseline; margin-top: 12px; padding: 0 2px; }
@@ -551,6 +563,10 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
   grid.addEventListener("click", () => vc.classList.remove("show"));
 }
 
+// 그림 위에서 마우스 오른쪽 버튼(저장 메뉴)·끌어서 저장 막기
+document.addEventListener("contextmenu", e => { if (e.target.tagName === "IMG") e.preventDefault(); });
+document.addEventListener("dragstart", e => { if (e.target.tagName === "IMG") e.preventDefault(); });
+
 // 배경 음악: 4곡을 순서대로 반복. 브라우저가 소리 자동 재생을 막아서, 처음 화면을 누르면 시작돼요.
 // 곡 순서·이름을 바꾸려면 이 목록만 고치면 됩니다.
 const TRACKS = [
@@ -588,5 +604,7 @@ function firstTouch(e) {
 }
 ["pointerdown", "keydown"].forEach(t => addEventListener(t, firstTouch, true));
 </script>
+<!-- 방문자 수 통계 (GoatCounter, 무료·개인정보 수집 없음). 보는 곳: https://leeeunju.goatcounter.com -->
+<script data-goatcounter="https://leeeunju.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
