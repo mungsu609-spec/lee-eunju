@@ -110,8 +110,13 @@
   }
   .lb.open { display: flex; }
   .lb figure { margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 0; flex: 1; width: 100%; }
-  .lb img { max-width: 100%; max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); object-fit: contain; flex: none; user-select: none; transition: opacity .25s; }
-  .lb img.loading { opacity: .2; }
+  .lb img { max-width: 100%; max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); object-fit: contain; flex: none; user-select: none; transition: opacity .2s; }
+  .lb img.loading { opacity: 0; visibility: hidden; transition: none; }
+  .lb.busy::after {
+    content: ""; position: absolute; left: 50%; top: 45%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    border: 2px solid rgba(241,236,228,.25); border-top-color: #f1ece4; border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .lb figcaption { margin-top: 18px; text-align: center; font-size: 18px; letter-spacing: .08em; }
   .lb figcaption small { margin-top: 8px; }
   .lb figcaption small { display: block; font-family: "Cormorant Garamond", serif; color: #a9a095; font-size: 15px; letter-spacing: .12em; }
@@ -283,18 +288,40 @@ addEventListener("resize", layout);
 // 크게 보기
 const lb = document.getElementById("lb"), lbImg = document.getElementById("lbImg"), lbCap = document.getElementById("lbCap");
 let cur = 0, lastFocus = null;
+// 큰 그림을 미리 불러 두는 곳 (한 번 불러온 그림은 바로 뜸)
+const cache = {};
+function load(w) {
+  if (!cache[w.file]) {
+    const im = new Image();
+    im.src = `images/${w.file}.jpg`;
+    cache[w.file] = { im, ready: false };
+    cache[w.file].p = (im.decode ? im.decode() : new Promise(r => { im.onload = r; }))
+      .catch(() => {}).then(() => { cache[w.file].ready = true; return im.src; });
+  }
+  return cache[w.file];
+}
+let token = 0;
 function show(i) {
   cur = (i + WORKS.length) % WORKS.length;
-  const w = WORKS[cur];
-  lbImg.classList.add("loading");
-  lbImg.src = `images/${w.file}-s.jpg`;           // 작은 그림 먼저
-  const big = new Image();
-  big.onload = () => { if (WORKS[cur] === w) { lbImg.src = big.src; lbImg.classList.remove("loading"); } };
-  big.src = `images/${w.file}.jpg`;                // 큰 그림 불러오면 교체
+  const w = WORKS[cur], my = ++token, c = load(w);
   lbImg.alt = `이은주, 〈${w.title}〉`;
   lbCap.innerHTML = `${w.title}${meta(w) ? `<span class="meta">${meta(w)}</span>` : ""}${w.desc ? `<span class="desc">${w.desc}</span>` : ""}<small>${pad(cur + 1)} / ${pad(WORKS.length)}</small>`;
-  // 다음 그림 미리 불러오기
-  new Image().src = `images/${WORKS[(cur + 1) % WORKS.length].file}.jpg`;
+  if (c.ready) {                       // 이미 불러온 그림: 바로 바꾸기
+    lbImg.src = c.im.src;
+    lbImg.classList.remove("loading");
+    lb.classList.remove("busy");
+  } else {                             // 아직이면: 이전 그림은 완전히 숨기고, 다 불러온 뒤에 보여 주기
+    lbImg.classList.add("loading");
+    lb.classList.add("busy");
+    c.p.then(src => {
+      if (my !== token) return;        // 그새 다른 그림으로 넘겼으면 무시
+      lbImg.src = src;
+      lbImg.classList.remove("loading");
+      lb.classList.remove("busy");
+    });
+  }
+  // 앞뒤 그림 미리 불러오기
+  [1, -1, 2].forEach(d => load(WORKS[(cur + d + WORKS.length) % WORKS.length]));
 }
 function openLb(i) {
   lastFocus = document.activeElement;
