@@ -67,6 +67,10 @@
   .hero h1 { font-size: clamp(44px, 8vw, 76px); font-weight: 400; letter-spacing: .3em; margin: 0 0 0 .3em; line-height: 1.2; }
   .hero p.sub { color: var(--muted); margin: 20px 0 0; font-size: 16px; }
   .hero .rule { width: 40px; height: 1px; background: var(--ink); margin: 32px auto 0; opacity: .5; }
+  .visits { margin: 20px 0 0; font-family: "Cormorant Garamond", serif; color: var(--muted); font-size: 16px; letter-spacing: .12em; }
+  .visits b { font-weight: 500; color: var(--ink); margin-left: 6px; font-variant-numeric: lining-nums; }
+  .visits .dot { margin: 0 12px; opacity: .6; }
+  .visits[hidden] { display: none; }
 
   /* 작품 목록 */
   section { padding: 40px 0 96px; }
@@ -235,6 +239,7 @@
     <h1>이은주</h1>
     <p class="sub">Painting · Portfolio</p>
     <div class="rule"></div>
+    <p class="visits" id="visits" hidden>Today<b id="vToday">0</b><span class="dot">·</span>Total<b id="vTotal">0</b></p>
   </div>
 
   <section id="works">
@@ -566,6 +571,18 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
 // 그림 위에서 마우스 오른쪽 버튼(저장 메뉴)·끌어서 저장 막기
 document.addEventListener("contextmenu", e => { if (e.target.tagName === "IMG") e.preventDefault(); });
 document.addEventListener("dragstart", e => { if (e.target.tagName === "IMG") e.preventDefault(); });
+
+// 오늘·전체 방문자 수 (GoatCounter에서 가져옴. 숫자는 최대 몇 시간 늦게 바뀔 수 있음)
+(function () {
+  const base = "https://leeeunju.goatcounter.com/counter/TOTAL.json";
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());   // 2026-10-14 형식
+  const get = url => fetch(url).then(r => (r.ok ? r.json() : Promise.reject(r.status)));
+  Promise.all([get(base + "?start=" + today), get(base)]).then(([t, a]) => {
+    document.getElementById("vToday").textContent = t.count;
+    document.getElementById("vTotal").textContent = a.count;
+    document.getElementById("visits").hidden = false;
+  }).catch(() => {});   // 못 가져오면 조용히 숨김
+})();
 
 // 배경 음악: 4곡을 순서대로 반복. 브라우저가 소리 자동 재생을 막아서, 처음 화면을 누르면 시작돼요.
 // 곡 순서·이름을 바꾸려면 이 목록만 고치면 됩니다.
